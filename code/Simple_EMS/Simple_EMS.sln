@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataModel", "DataModel\DataModel.csproj", "{92F0A7C6-60A1-4D7D-AACD-136B4BE504BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EMS_Business", "EMS_Business\EMS_Business.csproj", "{E3417748-B6C2-4D77-9A09-C95B0965912B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External DLLs", "External DLLs", "{FDC0FEE3-0B41-4423-B417-1C88922FE4E2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Simple_Log", "Simple_Log", "{CCE61B67-F1C2-4C47-989A-78505F1C551D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2.0", "2.0", "{4FDB7A49-872D-4568-A86C-6434201E479F}"
+	ProjectSection(SolutionItems) = preProject
+		External DLLs\Simple_Log\2.0\entity-framework-tips.md = External DLLs\Simple_Log\2.0\entity-framework-tips.md
+		External DLLs\Simple_Log\2.0\EntityFramework.dll = External DLLs\Simple_Log\2.0\EntityFramework.dll
+		External DLLs\Simple_Log\2.0\EntityFramework.SqlServer.dll = External DLLs\Simple_Log\2.0\EntityFramework.SqlServer.dll
+		External DLLs\Simple_Log\2.0\EntityFramework.SqlServer.xml = External DLLs\Simple_Log\2.0\EntityFramework.SqlServer.xml
+		External DLLs\Simple_Log\2.0\EntityFramework.xml = External DLLs\Simple_Log\2.0\EntityFramework.xml
+		External DLLs\Simple_Log\2.0\README.md = External DLLs\Simple_Log\2.0\README.md
+		External DLLs\Simple_Log\2.0\SimpleLog.dll = External DLLs\Simple_Log\2.0\SimpleLog.dll
+		External DLLs\Simple_Log\2.0\SimpleLog.dll.config = External DLLs\Simple_Log\2.0\SimpleLog.dll.config
+		External DLLs\Simple_Log\2.0\SimpleLog.pdb = External DLLs\Simple_Log\2.0\SimpleLog.pdb
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessModel", "BusinessModel\BusinessModel.csproj", "{5FDD6F8C-9F9D-4BE9-8FBA-844651C786B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EMS_Data", "EMS_Data\EMS_Data.csproj", "{9A685FED-3F93-4CE4-8B10-64D85ADE8289}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{92F0A7C6-60A1-4D7D-AACD-136B4BE504BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92F0A7C6-60A1-4D7D-AACD-136B4BE504BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92F0A7C6-60A1-4D7D-AACD-136B4BE504BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92F0A7C6-60A1-4D7D-AACD-136B4BE504BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3417748-B6C2-4D77-9A09-C95B0965912B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3417748-B6C2-4D77-9A09-C95B0965912B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3417748-B6C2-4D77-9A09-C95B0965912B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3417748-B6C2-4D77-9A09-C95B0965912B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FDD6F8C-9F9D-4BE9-8FBA-844651C786B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FDD6F8C-9F9D-4BE9-8FBA-844651C786B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FDD6F8C-9F9D-4BE9-8FBA-844651C786B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FDD6F8C-9F9D-4BE9-8FBA-844651C786B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A685FED-3F93-4CE4-8B10-64D85ADE8289}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A685FED-3F93-4CE4-8B10-64D85ADE8289}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A685FED-3F93-4CE4-8B10-64D85ADE8289}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A685FED-3F93-4CE4-8B10-64D85ADE8289}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CCE61B67-F1C2-4C47-989A-78505F1C551D} = {FDC0FEE3-0B41-4423-B417-1C88922FE4E2}
+		{4FDB7A49-872D-4568-A86C-6434201E479F} = {CCE61B67-F1C2-4C47-989A-78505F1C551D}
+	EndGlobalSection
+EndGlobal
