@@ -59,6 +59,7 @@
     <Compile Include="EventManager.cs" />
     <Compile Include="Info\SimpleException.cs" />
     <Compile Include="Info\SimpleExceptonCollection.cs" />
+    <Compile Include="ListenerManager.cs" />
     <Compile Include="Manager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThreadManager.cs" />
