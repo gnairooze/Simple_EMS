@@ -6,10 +6,11 @@ using System.Data.Entity.Core;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Simple_EMS.DataModel;
 
 namespace Simple_EMS.EMS_Business
 {
-    internal class EventTrigger:IDisposable
+    internal class EventManager:IDisposable
     {
         #region attributes
         private SimpleLog.Manager _LogManager = null;
@@ -17,7 +18,7 @@ namespace Simple_EMS.EMS_Business
         #endregion
 
         #region constructors
-        public EventTrigger(SimpleLog.Manager logManager, EMS_Data.EMS_Context context)
+        public EventManager(SimpleLog.Manager logManager, EMS_Data.EMS_Context context)
         {
             this._LogManager = logManager;
             this._Context = context;
@@ -52,14 +53,19 @@ namespace Simple_EMS.EMS_Business
             catch (Exception ex)
             {
                 #region log
-                string input = JsonConvert.SerializeObject(businessEventInstance);
-                JObject exJson = convertExceptionToJson(ex);
-                exJson.Add("input", input);
+                int counter = 1;
+                List<Info.SimpleException> simpleExceptions = new List<Info.SimpleException>();
+
+                convertExceptionToJson(ex, counter, ref simpleExceptions);
+
+                Info.SimpleExceptonCollection exceptionCollection = new Info.SimpleExceptonCollection();
+                exceptionCollection.SimpleExceptions = simpleExceptions;
+                exceptionCollection.Input = businessEventInstance;
 
                 this._LogManager.Add(new SimpleLog.Message()
                 {
                     CreatedOn = DateTime.Now,
-                    Data = JsonConvert.SerializeObject(exJson),
+                    Data = JsonConvert.SerializeObject(exceptionCollection),
                     Group = "EventTrigger",
                     MessageType = SimpleLog.Constants.MESSAGE_TYPE_ERROR,
                     Operation = "FireEvent",
@@ -83,9 +89,78 @@ namespace Simple_EMS.EMS_Business
             return succeeded;
         }
 
-        private JObject convertExceptionToJson(Exception ex)
+        public bool ProcessEvents()
+        {
+            bool succeeded = false;
+
+            IQueryable<DataModel.EventInstance> eventInstances = ReadNotProcessedEvents();
+
+            foreach (var eventInstance in eventInstances)
+            {
+                updateEventInstanceStatus(eventInstance, DataModel.Constants.EVENT_STATUS_IN_PROGRESS);
+
+                IQueryable<DataModel.ListenerSpecification> listenerSpecificaions = GetListenerSpecifications(eventInstance);
+
+                createListenerInstances(eventInstance, listenerSpecificaions);
+
+                DeleteEventInstace(eventInstance);
+            }
+
+            return succeeded;
+        }
+
+        private void createListenerInstances(EventInstance eventInstance, IQueryable<ListenerSpecification> listenerSpecificaions)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// get listener specifications that have not made instances of
+        /// </summary>
+        /// <param name="eventInstance"></param>
+        /// <returns></returns>
+        private IQueryable<ListenerSpecification> GetListenerSpecifications(EventInstance eventInstance)
+        {
+            var listenerSpecs = from listenerSpec in this._Context.ListenerSpecifications
+                        join eventSpec_ListenerSpec in this._Context.EventSpecification_ListenerSpecifications on listenerSpec.ID equals eventSpec_ListenerSpec.ListenerSpecification_ID
+                        join eventSpec in this._Context.EventSpecifications on eventSpec_ListenerSpec.EventSpecification_ID equals eventSpec.ID
+                        join listenerInstance in this._Context.ListenerInstances on listenerSpec.ID equals listenerInstance.ListenerSpecification_ID into listenerInstanceEventInstance
+                        from listenerInstance in listenerInstanceEventInstance.DefaultIfEmpty()
+                                where listenerInstance.EventInstance_ID == eventInstance.ID
+                                && listenerInstance == null
+                                select listenerSpec;
+
+            return listenerSpecs;
+        }
+
+        private void DeleteEventInstace(EventInstance eventInstance)
+        {
+            this._Context.EventInstances.Remove(eventInstance);
+
+            this._Context.SaveChanges();
+        }
+
+        private void updateEventInstanceStatus(DataModel.EventInstance eventInstance, int status)
+        {
+            eventInstance.Status = status;
+            eventInstance.ModifiedDate = DateTime.Now;
+
+            this._Context.SaveChanges();
+        }
+
+        private void convertExceptionToJson(Exception ex, int counter, ref List<Info.SimpleException> simpleExceptions)
+        {
+            Info.SimpleException simple_ex = new Info.SimpleException();
+            simple_ex.Serial = counter++;
+            simple_ex.Message = ex.Message;
+            simple_ex.Stack = ex.StackTrace;
+
+            simpleExceptions.Add(simple_ex);
+
+            if (ex.InnerException != null)
+            {
+                convertExceptionToJson(ex.InnerException, counter, ref simpleExceptions);
+            }
         }
 
         private DataModel.EventInstance createDataModel(BusinessModel.EventInstance businessEventInstance)
@@ -185,6 +260,11 @@ namespace Simple_EMS.EMS_Business
             #endregion
 
             return this._Context.EventSpecifications.Where(es => es.Name == name).First();
+        }
+
+        private IQueryable<DataModel.EventInstance> ReadNotProcessedEvents()
+        {
+            return this._Context.EventInstances.Where(e => e.Status == DataModel.Constants.EVENT_STATUS_NOT_PROCESSED || e.Status == DataModel.Constants.EVENT_STATUS_IN_PROGRESS);
         }
 
         public void Dispose()

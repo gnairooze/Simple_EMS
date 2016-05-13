@@ -23,5 +23,12 @@ namespace Simple_EMS.DataModel
         public const int LISTENER_STATUS_SKIPPED = 3;
         public const int LISTENER_STATUS_FAILED = 4;
         #endregion
+
+        #region listener specification method
+        public const string LISTENER_METHOD_GET = "GET";
+        public const string LISTENER_METHOD_POST = "POST";
+        public const string LISTENER_METHOD_PUT = "PUT";
+        public const string LISTENER_METHOD_DELETE = "DELETE";
+        #endregion
     }
 }

@@ -54,7 +54,7 @@ namespace Simple_EMS.EMS_Business
             });
             #endregion
 
-            using (EventTrigger trigger = new EventTrigger(this._LogManager, this._Context))
+            using (EventManager trigger = new EventManager(this._LogManager, this._Context))
             {
                 succeeded = trigger.FireEvent(businessEventInstance);
             }

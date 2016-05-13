@@ -30,6 +30,11 @@ namespace Simple_EMS.DataModel
         public string Headers { get; set; }
         [Required]
         public int Max_Retrials { get; set; }
+        /// <summary>
+        /// the duration in days to keep the listener instance
+        /// </summary>
+        [Required]
+        public int Keep_Duration { get; set; }
         [Required]
         public DateTime CreatedDate { get; set; }
         [Required]
