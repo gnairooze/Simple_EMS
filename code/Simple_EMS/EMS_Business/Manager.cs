@@ -11,9 +11,21 @@ namespace Simple_EMS.EMS_Business
         #region attributes
         SimpleLog.Manager _LogManager = null;
         EMS_Data.EMS_Context _Context = new EMS_Data.EMS_Context();
+        EventManager _EventManager = null;
+        ListenerManager _ListenerManager = null;
         #endregion
 
-        private void InitializeLog()
+        #region constructors
+        public Manager()
+        {
+            initializeLog();
+
+            this._ListenerManager = new ListenerManager(this._LogManager, this._Context);
+            this._EventManager = new EventManager(this._LogManager, this._Context, this._ListenerManager);
+        }
+        #endregion
+
+        private void initializeLog()
         {
             #region iniatilize console log
             dynamic consoleSettings = new System.Dynamic.ExpandoObject();
@@ -54,10 +66,7 @@ namespace Simple_EMS.EMS_Business
             });
             #endregion
 
-            using (EventManager trigger = new EventManager(this._LogManager, this._Context))
-            {
-                succeeded = trigger.FireEvent(businessEventInstance);
-            }
+            succeeded = this._EventManager.FireEvent(businessEventInstance);
 
             #region log end
             this._LogManager.Add(new SimpleLog.Message()
@@ -76,8 +85,63 @@ namespace Simple_EMS.EMS_Business
             return succeeded;
         }
 
+        public bool ProcessEvents()
+        {
+            bool succeeded = false;
+
+            #region log start
+            this._LogManager.Add(new SimpleLog.Message()
+            {
+                CreatedOn = DateTime.Now,
+                IdentifierName = string.Empty,
+                IdentifierValue = string.Empty,
+                Data = "{}",
+                Group = "ProcessEvents",
+                MessageType = SimpleLog.Constants.MESSAGE_TYPE_INFO,
+                Operation = "ProcessEvents started",
+                Owner = this.GetType().ToString()
+            });
+            #endregion
+
+            succeeded = this._EventManager.ProcessEvents();
+
+            #region log start
+            this._LogManager.Add(new SimpleLog.Message()
+            {
+                CreatedOn = DateTime.Now,
+                IdentifierName = string.Empty,
+                IdentifierValue = string.Empty,
+                Data = "{}",
+                Group = "ProcessEvents",
+                MessageType = SimpleLog.Constants.MESSAGE_TYPE_INFO,
+                Operation = "ProcessEvents ended",
+                Owner = this.GetType().ToString()
+            });
+            #endregion
+
+            return succeeded;
+        }
+
+        public bool ProcessListeners()
+        {
+            bool succeeded = false;
+
+
+            return succeeded;
+        }
+
         public void Dispose()
         {
+            if (this._ListenerManager != null)
+            {
+                this._ListenerManager.Dispose();
+            }
+            
+            if(this._EventManager != null)
+            {
+                this._EventManager.Dispose();
+            }
+            
             this._Context.Dispose();
         }
     }

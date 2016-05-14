@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Simple_EMS.DataModel;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Newtonsoft.Json;
 
 namespace Simple_EMS.EMS_Business
 {
@@ -38,7 +39,7 @@ namespace Simple_EMS.EMS_Business
             return succeeded;
         }
 
-        public bool UpdateListenerInstanceStatus(DataModel.ListenerInstance listenerInstance, int status)
+        public bool UpdateListenerInstanceStatus(DataModel.ListenerInstance listenerInstance, int status, bool decreaseTrialCount)
         {
             bool succeeded = false;
 
@@ -48,6 +49,11 @@ namespace Simple_EMS.EMS_Business
             if (status == DataModel.Constants.LISTENER_STATUS_SUCCEEDED)
             {
                     listenerInstance.DeleteDate = listenerInstance.ModifiedDate.AddDays(listenerInstance.Keep_Duration);
+            }
+
+            if(decreaseTrialCount)
+            {
+                listenerInstance.RemainingRetrials--;
             }
 
             this._Context.SaveChanges();
@@ -83,12 +89,13 @@ namespace Simple_EMS.EMS_Business
             return listenerInstance;
         }
 
-        public async Task InvokeListener(DataModel.ListenerInstance listenerInstance)
+        public async Task<bool> InvokeListener(DataModel.ListenerInstance listenerInstance)
         {
             bool succeeded = false;
 
             using (var client = new HttpClient())
             {
+                #region create http client object
                 client.BaseAddress = new Uri(listenerInstance.URL);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -98,6 +105,10 @@ namespace Simple_EMS.EMS_Business
                     string[] splittedHeader = header.Split(":".ToCharArray());
                     client.DefaultRequestHeaders.Add(splittedHeader[0], splittedHeader[1]);
                 }
+                #endregion
+
+                Info.HTTPResponseLog responseLog = new Info.HTTPResponseLog();
+                responseLog.EntityData = listenerInstance;
 
                 HttpResponseMessage response = null;
 
@@ -111,9 +122,19 @@ namespace Simple_EMS.EMS_Business
                         }
                         else
                         {
-                            //log response
+                            #region log response error
+                            responseLog.Response = response;
+                            this._LogManager.Add(new SimpleLog.Message()
+                            {
+                                CreatedOn = DateTime.Now,
+                                Data = JsonConvert.SerializeObject(responseLog),
+                                Group = "InvokeListener",
+                                MessageType = SimpleLog.Constants.MESSAGE_TYPE_INFO,
+                                Operation = DataModel.Constants.LISTENER_METHOD_GET,
+                                Owner = this.GetType().ToString()
+                            });
+                            #endregion
                         }
-                        
                         break;
                     case DataModel.Constants.LISTENER_METHOD_POST:
                         response = await client.PostAsync(listenerInstance.URL, new StringContent(listenerInstance.EventData));
@@ -123,9 +144,19 @@ namespace Simple_EMS.EMS_Business
                         }
                         else
                         {
-                            //log response
+                            #region log response error
+                            responseLog.Response = response;
+                            this._LogManager.Add(new SimpleLog.Message()
+                            {
+                                CreatedOn = DateTime.Now,
+                                Data = JsonConvert.SerializeObject(responseLog),
+                                Group = "InvokeListener",
+                                MessageType = SimpleLog.Constants.MESSAGE_TYPE_INFO,
+                                Operation = DataModel.Constants.LISTENER_METHOD_POST,
+                                Owner = this.GetType().ToString()
+                            });
+                            #endregion
                         }
-                        
                         break;
                     case DataModel.Constants.LISTENER_METHOD_PUT:
                         response = await client.PutAsync(listenerInstance.URL, new StringContent(listenerInstance.EventData));
@@ -135,9 +166,19 @@ namespace Simple_EMS.EMS_Business
                         }
                         else
                         {
-                            //log response
+                            #region log response error
+                            responseLog.Response = response;
+                            this._LogManager.Add(new SimpleLog.Message()
+                            {
+                                CreatedOn = DateTime.Now,
+                                Data = JsonConvert.SerializeObject(responseLog),
+                                Group = "InvokeListener",
+                                MessageType = SimpleLog.Constants.MESSAGE_TYPE_INFO,
+                                Operation = DataModel.Constants.LISTENER_METHOD_PUT,
+                                Owner = this.GetType().ToString()
+                            });
+                            #endregion
                         }
-
                         break;
                     case DataModel.Constants.LISTENER_METHOD_DELETE:
                         response = await client.DeleteAsync(listenerInstance.URL);
@@ -147,19 +188,40 @@ namespace Simple_EMS.EMS_Business
                         }
                         else
                         {
-                            //log response
+                            #region log response error
+                            responseLog.Response = response;
+                            this._LogManager.Add(new SimpleLog.Message()
+                            {
+                                CreatedOn = DateTime.Now,
+                                Data = JsonConvert.SerializeObject(responseLog),
+                                Group = "InvokeListener",
+                                MessageType = SimpleLog.Constants.MESSAGE_TYPE_INFO,
+                                Operation = DataModel.Constants.LISTENER_METHOD_DELETE,
+                                Owner = this.GetType().ToString()
+                            });
+                            #endregion
                         }
-                        
                         break;
                 }
             }
 
-            //update listener instance status
+            #region update listener instance status
+            int status = DataModel.Constants.LISTENER_STATUS_IN_PROGRESS;
+
+            if (succeeded)
+            {
+                status = DataModel.Constants.LISTENER_STATUS_SUCCEEDED;
+            }
+            
+            UpdateListenerInstanceStatus(listenerInstance, status, true);
+            #endregion
+
+            return succeeded;
         }
 
         public void Dispose()
         {
-            this._Context.Dispose();
+            
         }
     }
 }

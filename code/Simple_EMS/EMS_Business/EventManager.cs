@@ -15,13 +15,15 @@ namespace Simple_EMS.EMS_Business
         #region attributes
         private SimpleLog.Manager _LogManager = null;
         private EMS_Data.EMS_Context _Context = null;
+        private ListenerManager _ListenerManager = null;
         #endregion
 
         #region constructors
-        public EventManager(SimpleLog.Manager logManager, EMS_Data.EMS_Context context)
+        public EventManager(SimpleLog.Manager logManager, EMS_Data.EMS_Context context, ListenerManager listenerManager)
         {
             this._LogManager = logManager;
             this._Context = context;
+            this._ListenerManager = listenerManager;
         }
         #endregion
 
@@ -106,12 +108,17 @@ namespace Simple_EMS.EMS_Business
                 DeleteEventInstace(eventInstance);
             }
 
+            succeeded = true;
+
             return succeeded;
         }
 
         private void createListenerInstances(EventInstance eventInstance, IQueryable<ListenerSpecification> listenerSpecificaions)
         {
-            throw new NotImplementedException();
+            foreach (var listenerSpecificaion in listenerSpecificaions)
+            {
+                this._ListenerManager.AddListenerInstance(eventInstance, listenerSpecificaion);
+            }
         }
 
         /// <summary>
@@ -269,19 +276,9 @@ namespace Simple_EMS.EMS_Business
 
         public void Dispose()
         {
-            #region log
-            this._LogManager.Add(new SimpleLog.Message()
-            {
-                CreatedOn = DateTime.Now,
-                Data = "{}",
-                Group = "EventTrigger",
-                MessageType = SimpleLog.Constants.MESSAGE_TYPE_INFO,
-                Operation = "Disposed",
-                Owner = this.GetType().ToString()
-            });
-            #endregion
+            
 
-            this._Context.Dispose();
+            
         }
     }
 }
